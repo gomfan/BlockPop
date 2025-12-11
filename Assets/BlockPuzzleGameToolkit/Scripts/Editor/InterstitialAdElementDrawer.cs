@@ -9,6 +9,10 @@ using System.Collections.Generic;
 
 namespace BlockPuzzleGameToolkit.Scripts.Editor
 {
+    /// <summary>
+    /// 전면 광고(Interstitial Ad) 설정 요소(InterstitialAdElement)를 인스펙터에서 편하게 편집하기 위한 커스텀 드로어입니다.
+    /// 광고 참조, 트리거 팝업 선택, 레벨 조건 등을 직관적인 UI로 제공합니다.
+    /// </summary>
     [CustomPropertyDrawer(typeof(InterstitialAdElement))]
     public class InterstitialAdElementDrawer : PropertyDrawer
     {
@@ -17,10 +21,12 @@ namespace BlockPuzzleGameToolkit.Scripts.Editor
 
         public override VisualElement CreatePropertyGUI(SerializedProperty property)
         {
+            // 프로젝트 내의 모든 팝업 프리팹을 로드합니다.
             LoadPopupPrefabs();
 
             var container = new VisualElement();
             
+            // 각 프로퍼티 찾기
             var adReferenceProperty = property.FindPropertyRelative("adReference");
             var elementNameProperty = property.FindPropertyRelative("elementName");
             var popupProperty = property.FindPropertyRelative("popup");
@@ -30,10 +36,10 @@ namespace BlockPuzzleGameToolkit.Scripts.Editor
             var maxLevelProperty = property.FindPropertyRelative("maxLevel");
             var frequencyProperty = property.FindPropertyRelative("frequency");
 
-            // Update element name based on ad reference
+            // 광고 참조에 따라 요소 이름 자동 업데이트
             UpdateElementName(adReferenceProperty, elementNameProperty);
 
-            // Ad Reference field
+            // 광고 참조 필드 (값 변경 시 이름 업데이트 콜백 등록)
             var adReferenceField = new PropertyField(adReferenceProperty);
             adReferenceField.RegisterValueChangeCallback(evt =>
             {
@@ -42,12 +48,12 @@ namespace BlockPuzzleGameToolkit.Scripts.Editor
             });
             container.Add(adReferenceField);
 
-            // Popup dropdown
+            // 팝업 선택 드롭다운 (Popup 컴포넌트가 있는 프리팹 목록 표시)
             var popupDropdown = new DropdownField("Popup", popupNames, GetPopupIndex(popupProperty.objectReferenceValue as Popup));
             popupDropdown.RegisterValueChangedCallback(evt =>
             {
                 int selectedIndex = popupNames.IndexOf(evt.newValue);
-                if (selectedIndex == 0)
+                if (selectedIndex == 0) // "None" 선택 시
                 {
                     popupProperty.objectReferenceValue = null;
                 }
@@ -59,20 +65,20 @@ namespace BlockPuzzleGameToolkit.Scripts.Editor
             });
             container.Add(popupDropdown);
 
-            // Show options
+            // 표시 옵션 필드
             var showOnOpenField = new PropertyField(showOnOpenProperty);
             container.Add(showOnOpenField);
 
             var showOnCloseField = new PropertyField(showOnCloseProperty);
             container.Add(showOnCloseField);
 
-            // Level conditions header
+            // 레벨 조건 헤더
             var levelHeader = new Label("Level Conditions");
             levelHeader.style.unityFontStyleAndWeight = FontStyle.Bold;
             levelHeader.style.marginTop = 5;
             container.Add(levelHeader);
 
-            // Level conditions fields
+            // 레벨 조건 및 빈도 필드
             var minLevelField = new PropertyField(minLevelProperty);
             container.Add(minLevelField);
 
@@ -85,6 +91,7 @@ namespace BlockPuzzleGameToolkit.Scripts.Editor
             return container;
         }
 
+        // 프로젝트 내의 모든 'Popup' 컴포넌트를 가진 프리팹을 검색하여 목록을 만듭니다.
         private void LoadPopupPrefabs()
         {
             string[] guids = AssetDatabase.FindAssets("t:Prefab");
@@ -113,6 +120,7 @@ namespace BlockPuzzleGameToolkit.Scripts.Editor
             return 0;
         }
 
+        // 광고 참조 객체의 이름을 요소 이름으로 자동 설정합니다.
         private void UpdateElementName(SerializedProperty adReferenceProperty, SerializedProperty elementNameProperty)
         {
             if (adReferenceProperty.objectReferenceValue != null)

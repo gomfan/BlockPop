@@ -14,14 +14,23 @@ using UnityEngine;
 
 namespace BlockPuzzleGameToolkit.Scripts.Data
 {
+    /// <summary>
+    /// 에디터에서 생성 가능한 일반적인 리소스 데이터입니다.
+    /// 코인 외의 다른 재화나 아이템(예: 하트, 보석 등)을 정의할 때 사용됩니다.
+    /// ScriptableObject로 생성하여 인스펙터에서 초기값을 설정할 수 있습니다.
+    /// </summary>
     [CreateAssetMenu(fileName = "Resource", menuName = "BlockPuzzleGameToolkit/Data/ResourceItem", order = 1)]
     public class ResourceItem : ResourceObject
     {
+        [Tooltip("이 리소스의 기본 초기 수량")]
         public int defaultValue;
+
+        // ResourceObject의 DefaultValue 프로퍼티를 오버라이드하여 인스펙터 설정값을 반환
         public override int DefaultValue => defaultValue;
 
         public override void ResetResource()
         {
+            // 리소스 초기화 로직이 필요한 경우 여기에 구현
         }
     }
 }

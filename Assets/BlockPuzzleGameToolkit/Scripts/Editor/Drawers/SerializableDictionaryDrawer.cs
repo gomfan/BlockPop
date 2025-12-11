@@ -20,6 +20,10 @@ using UnityEngine.UIElements;
 
 namespace BlockPuzzleGameToolkit.Scripts.Editor.Drawers
 {
+    /// <summary>
+    /// SerializableDictionary<TKey, TValue> 타입을 인스펙터에 그리기 위한 커스텀 프로퍼티 드로어입니다.
+    /// UIElements를 사용하여 효율적인 리스트 뷰 형태로 딕셔너리를 표시하고 편집할 수 있게 해줍니다.
+    /// </summary>
     [CustomPropertyDrawer(typeof(SerializableDictionary<,>))]
     public class SerializableDictionaryDrawer : PropertyDrawer
     {
@@ -34,8 +38,13 @@ namespace BlockPuzzleGameToolkit.Scripts.Editor.Drawers
             var listView = new ListView();
             foldout.Add(listView);
             var dictionaryType = fieldInfo.FieldType;
+            // 제네릭 인수에서 키 타입을 가져옵니다.
             var keyType = dictionaryType.GetGenericArguments()[0];
+            
+            // 각 항목을 그릴 VisualElement 생성 (키와 값을 나란히 표시)
             listView.makeItem = () => new PackElementDictionaryItemElement(keyType);
+            
+            // 데이터 바인딩: 각 항목의 키와 값 프로퍼티를 UI 요소에 연결
             listView.bindItem = (element, index) =>
             {
                 var itemElement = (PackElementDictionaryItemElement)element;
@@ -59,6 +68,7 @@ namespace BlockPuzzleGameToolkit.Scripts.Editor.Drawers
 
             RefreshList();
 
+            // 항목 추가 시 호출되는 콜백
             listView.itemsAdded += indexes =>
             {
                 var keysProp = property.FindPropertyRelative("keys");
@@ -67,14 +77,16 @@ namespace BlockPuzzleGameToolkit.Scripts.Editor.Drawers
                 property.serializedObject.Update();
                 foreach (var index in indexes)
                 {
+                    // 키와 값 배열에 각각 항목 추가
                     keysProp.InsertArrayElementAtIndex(index);
                     valuesProp.InsertArrayElementAtIndex(index);
 
+                    // 새로 추가된 키 초기화 (객체 참조 null 등)
                     var keyProp = keysProp.GetArrayElementAtIndex(index);
                     keyProp.objectReferenceValue = null;
 
+                    // 새로 추가된 값 초기화 (타입에 맞게 기본값 설정)
                     var valueProp = valuesProp.GetArrayElementAtIndex(index);
-                    // Reset the value based on its type
                     ResetValue(valueProp);
                 }
 
@@ -103,6 +115,9 @@ namespace BlockPuzzleGameToolkit.Scripts.Editor.Drawers
             return container;
         }
 
+        /// <summary>
+        /// 프로퍼티 타입에 따라 값을 초기화합니다.
+        /// </summary>
         private void ResetValue(SerializedProperty valueProp)
         {
             switch (valueProp.propertyType)
@@ -127,6 +142,10 @@ namespace BlockPuzzleGameToolkit.Scripts.Editor.Drawers
         }
     }
 
+    /// <summary>
+    /// 딕셔너리의 한 항목(Key-Value 쌍)을 표시하기 위한 커스텀 VisualElement입니다.
+    /// 왼쪽에는 키, 오른쪽에는 값을 표시합니다.
+    /// </summary>
     public class PackElementDictionaryItemElement : VisualElement
     {
         private readonly ObjectField keyField;
